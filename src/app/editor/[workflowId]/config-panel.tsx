@@ -135,13 +135,13 @@ export function ConfigPanel({ node, onChange, onDelete, onClose }: ConfigPanelPr
 
       {node.type === "publish" && (
         <label className="block">
-          <span className="text-xs text-gray-500">Subdomain (اختياري)</span>
+          <span className="text-xs text-gray-500">اسم المتجر في الرابط (اختياري)</span>
           <input
             type="text"
             dir="ltr"
             value={String(config.subdomain ?? "")}
             onChange={(e) => setConfig({ subdomain: e.target.value })}
-            placeholder="my-store"
+            placeholder="my-store — يصبح /my-store"
             className="mt-1 w-full border rounded px-2 py-1 text-sm"
           />
         </label>

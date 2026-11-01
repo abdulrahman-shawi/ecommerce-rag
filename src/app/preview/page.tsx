@@ -2,10 +2,19 @@
 // (عنوان المتجر، الصفحات المولدة، صورة الهيدر، رابط النشر).
 
 import Link from "next/link";
+import { headers } from "next/headers";
 import { requireUser } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+/** دومين الاستضافة الحالي (localhost في التطوير، دومين Vercel/مخصص في الإنتاج) */
+async function currentOrigin(): Promise<string> {
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  const host = h.get("host") ?? "localhost:3000";
+  return `${proto}://${host}`;
+}
 
 export default async function PreviewPage({
   searchParams,
@@ -45,7 +54,8 @@ export default async function PreviewPage({
   const storeTitle = (merged.storeTitle as string) ?? workflow.name;
   const pages = (merged.pages as Array<{ path: string; title: string; sections: string[] }>) ?? [];
   const heroImage = (merged.exportUrl as string) ?? null;
-  const publishedUrl = (merged.url as string) ?? null;
+  const publishedPath = (merged.url as string) ?? null;
+  const publishedUrl = publishedPath ? `${await currentOrigin()}${publishedPath}` : null;
 
   return (
     <main className="min-h-screen bg-gray-50" dir="rtl">

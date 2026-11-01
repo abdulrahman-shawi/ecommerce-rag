@@ -88,7 +88,7 @@ src/
 | `canvaAutofill` | توليد تصميم من Brand Template عبر Autofill API (retry + polling) |
 | `canvaExport` | تصدير التصميم PNG/JPG/PDF |
 | `storeBuilder` | توليد صفحات المتجر من قالب (basic/premium) |
-| `publish` | نشر المتجر على subdomain (يحدّث حالة الـ Store) |
+| `publish` | نشر المتجر على مسار `/الاسم` — يعمل على أي دومين تستضيف عليه المنصة (يحدّث حالة الـ Store) |
 | `notification` | إشعار واتساب/بريد (محاكاة — تُسجَّل في الـ logs) |
 
 **إضافة عقدة جديدة:** أنشئ كلاسًا يطبق `NodeHandler` في `src/lib/workflow-engine/handlers/`

@@ -1,6 +1,7 @@
 // لوحة التحكم: قائمة المتاجر وWorkflows التابعة لها (Server Component)
 
 import Link from "next/link";
+import { headers } from "next/headers";
 import { requireUser } from "@/lib/auth-helpers";
 import { db } from "@/lib/db";
 import { createWorkflow, logout } from "./actions";
@@ -9,6 +10,9 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const user = await requireUser();
+
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host") ?? "localhost:3000"}`;
 
   const stores = await db.store.findMany({
     where: { userId: user.id },
@@ -49,7 +53,14 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{store.name}</h2>
             <span className="text-xs border rounded-full px-2 py-1">
-              {store.status === "published" ? `منشور: ${store.domain ?? ""}` : "مسودة"}
+              {store.status === "published" && store.domain ? (
+                <a href={store.domain} className="underline text-green-700" dir="ltr">
+                  {origin}
+                  {store.domain}
+                </a>
+              ) : (
+                "مسودة"
+              )}
             </span>
           </div>
 

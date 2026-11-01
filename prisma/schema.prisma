@@ -32,7 +32,7 @@ model Store {
   userId String
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name   String
-  domain String? // subdomain المنشور مثل mystore.storeflow.app
+  domain String? // مسار النشر داخل المنصة مثل /my-store — الرابط الكامل = دومين الاستضافة + المسار
   status String  @default("draft") // draft | published
 
   workflows Workflow[]
