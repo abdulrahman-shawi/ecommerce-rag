@@ -1,0 +1,107 @@
+// StoreFlow — مخطط قاعدة البيانات (PostgreSQL)
+// التنسيق المشترك لحالات الموارد: draft / queued / running / success / failed / published
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------- المستخدمون -----------------------------
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String?
+  passwordHash String? // للدخول عبر Credentials؛ يبقى null لحسابات OAuth الخالصة
+  plan         String       @default("free") // free | pro | enterprise
+
+  stores     Store[]
+  canvaToken CanvaToken?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+// ------------------------------ المتاجر -------------------------------
+
+model Store {
+  id     String  @id @default(cuid())
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+  domain String? // subdomain المنشور مثل mystore.storeflow.app
+  status String  @default("draft") // draft | published
+
+  workflows Workflow[]
+  designs   Design[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+// ----------------------------- الـ Workflows ---------------------------
+
+// definition يخزن تعريف React Flow كاملًا: { nodes: [...], edges: [...] }
+// كل عقدة: { id, type, position: {x,y}, data: { label, config } }
+model Workflow {
+  id         String  @id @default(cuid())
+  storeId    String
+  store      Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  name       String
+  definition Json    @default("{\"nodes\":[],\"edges\":[]}")
+  status     String  @default("draft") // draft | published
+
+  runs      WorkflowRun[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([storeId])
+}
+
+// سجل عملية تنفيذ واحدة. logs مخزنة كـ JSON:
+// [ { nodeId, nodeType, status, message?, output?, error?, at } ]
+model WorkflowRun {
+  id         String    @id @default(cuid())
+  workflowId String
+  workflow   Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status     String    @default("queued") // queued | running | success | failed
+  logs       Json      @default("[]")
+  error      String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([workflowId])
+}
+
+// ---------------------------- ربط حساب Canva ---------------------------
+
+model CanvaToken {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --------------------------- تصاميم المتجر -----------------------------
+
+model Design {
+  id             String   @id @default(cuid())
+  storeId        String
+  store          Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  canvaDesignId  String
+  exportUrl      String? // رابط التصدير النهائي (PNG/JPG/PDF)
+  status         String   @default("pending") // pending | ready | exported
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([storeId])
+}
