@@ -8,10 +8,11 @@ import type { FlowNodeData } from "./nodes";
 interface ConfigPanelProps {
   node: { id: string; type?: string; data: FlowNodeData };
   onChange: (nodeId: string, patch: Partial<FlowNodeData>) => void;
+  onDelete: (nodeId: string) => void;
   onClose: () => void;
 }
 
-export function ConfigPanel({ node, onChange, onClose }: ConfigPanelProps) {
+export function ConfigPanel({ node, onChange, onDelete, onClose }: ConfigPanelProps) {
   const { config } = node.data;
   const setConfig = (patch: Record<string, unknown>) =>
     onChange(node.id, { config: { ...config, ...patch } });
@@ -186,6 +187,14 @@ export function ConfigPanel({ node, onChange, onClose }: ConfigPanelProps) {
       {!["trigger", "form", "canvaAutofill", "canvaExport", "storeBuilder", "publish", "notification"].includes(node.type ?? "") && (
         <JsonFallback config={config} setConfig={setConfig} />
       )}
+
+      <button
+        type="button"
+        onClick={() => onDelete(node.id)}
+        className="w-full border border-red-300 text-red-600 rounded px-2 py-1 text-sm hover:bg-red-50"
+      >
+        حذف العقدة
+      </button>
     </aside>
   );
 }

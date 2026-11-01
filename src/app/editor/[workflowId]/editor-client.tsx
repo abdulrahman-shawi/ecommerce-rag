@@ -215,6 +215,15 @@ function EditorCanvas({ workflow, storeName, descriptors }: EditorProps) {
     [setNodes]
   );
 
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((ns) => ns.filter((n) => n.id !== nodeId));
+      setEdges((es) => es.filter((e) => e.source !== nodeId && e.target !== nodeId));
+      setSelectedId(null);
+    },
+    [setNodes, setEdges]
+  );
+
   const selectedNode = nodes.find((n) => n.id === selectedId) ?? null;
 
   // ------------------------------ العرض ------------------------------
@@ -271,6 +280,7 @@ function EditorCanvas({ workflow, storeName, descriptors }: EditorProps) {
             onConnect={onConnect}
             onNodeClick={(_, node) => setSelectedId(node.id)}
             onPaneClick={() => setSelectedId(null)}
+            deleteKeyCode={["Backspace", "Delete"]}
             fitView
             proOptions={{ hideAttribution: true }}
           >
@@ -283,6 +293,7 @@ function EditorCanvas({ workflow, storeName, descriptors }: EditorProps) {
           <ConfigPanel
             node={selectedNode}
             onChange={updateNode}
+            onDelete={deleteNode}
             onClose={() => setSelectedId(null)}
           />
         )}
